@@ -2,15 +2,35 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 const RegisterPage = ({ onRegister }) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [pwd, setPwd] = useState("");
   const [org, setOrg] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = () => {
-    if (name && email && org) {
-      onRegister({ name, email, org });
-      navigate("/home");
+  //send payload to register api endpoint -> POST
+  const handleRegister = async () => {
+    if (username && pwd && org) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/register/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ username, org, pwd }),
+          }
+        );
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Something went wrong");
+        }
+        console.log("User registered successfully");
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -26,17 +46,17 @@ const RegisterPage = ({ onRegister }) => {
 
         <input
           type="text"
-          placeholder="Full Name"
+          placeholder="Username"
           className="w-full p-3 mb-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
         <input
-          type="email"
-          placeholder="Email Address"
+          type="password"
+          placeholder="Password"
           className="w-full p-3 mb-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={pwd}
+          onChange={(e) => setPwd(e.target.value)}
         />
         <input
           type="text"

@@ -11,7 +11,7 @@ const Dashboard = ({ user }) => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-extrabold text-indigo-700">
-            Hey, {user.name} 👋
+            Hey, {user.username} 👋
           </h1>
           <p className="text-md text-gray-600">
             Organization: <span className="font-semibold">{user.org}</span>

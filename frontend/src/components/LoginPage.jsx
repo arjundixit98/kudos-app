@@ -1,16 +1,39 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const LoginPage = ({ onLogin }) => {
-  const [name, setName] = useState("");
+const LoginPage = ({ setCurrentUser }) => {
+  const [username, setUsername] = useState("");
   const [pwd, setPwd] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate("/dashboard");
-    if (name && pwd) {
-      onLogin({ name, pwd });
-      navigate("/home");
+  // send payload to login API endpoint -> POST
+  const handleLogin = async () => {
+    if (username && pwd) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/login/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ username, pwd }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Something went wrong");
+        }
+
+        const data = await response.json();
+        console.log(data.message);
+        setCurrentUser(data.user);
+        navigate("/dashboard");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -25,10 +48,10 @@ const LoginPage = ({ onLogin }) => {
         </p>
         <input
           type="text"
-          placeholder="Your Name"
+          placeholder="Username"
           className="w-full p-3 mb-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
         <input
           type="password"
