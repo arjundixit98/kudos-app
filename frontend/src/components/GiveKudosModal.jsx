@@ -1,15 +1,13 @@
 // GiveKudosModal.jsx
 import { useState } from "react";
-const GiveKudosModal = ({ onClose, usersInOrg, user }) => {
+const GiveKudosModal = ({ onClose, usersInOrg, user, kudosLeft }) => {
   const [recipient, setRecipient] = useState("");
   const [message, setMessage] = useState("");
-  const [kudosLeft, setKudosLeft] = useState(3);
 
   const handleSubmit = async () => {
     if (recipient && message) {
       console.log(recipient);
       alert(`🎉 Kudo sent to ${recipient}:\n\n“${message}”`);
-      setKudosLeft(kudosLeft - 1);
 
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/api/give_kudos/`, {

@@ -9,12 +9,30 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .models import Kudos
 from .serializers import KudosSerializer
+from django.utils.timezone import now
+from datetime import timedelta
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
+
+def get_kudos_given_this_week(user):
+  today = now().date()
+  start_of_week = today - timedelta(days=today.weekday())
+  return len(Kudos.objects.filter(sender=user, created_at__date__gte=start_of_week))
 
 
 class HomeAPIView(APIView):
   def get(self, request):
     return JsonResponse({'message':'Hi'})
+  
+class AuthAPIView(APIView):
+  permission_classes = [IsAuthenticated]
+  def get(self, request):
+    try:
+      user = request.user
+      return Response({'message' : 'User authenticated successfully', 'user' : {'username' : user.username, 'org' : user.organization}}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+      return Response({'error' : str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 class KudosStatsAPIView(APIView):
   def get(self, request, username):
@@ -30,7 +48,10 @@ class KudosStatsAPIView(APIView):
       received_serialized = received_serializer.data
 
       print(type(given_serialized),given_serialized)
-      return Response({'given':given_serialized, 'received':received_serialized}, status=status.HTTP_200_OK)
+      return Response({'given':given_serialized, 
+                       'received':received_serialized,
+                       'remaining' : max(0, 3-get_kudos_given_this_week(user))
+                        }, status=status.HTTP_200_OK)
     
     except Exception as e:
       return Response({'error' : str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

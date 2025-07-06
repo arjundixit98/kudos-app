@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 # Create your models here.
 
 class CustomUser(AbstractUser):
@@ -12,6 +13,7 @@ class Kudos(models.Model):
   sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name="kudos_given")
   receiver = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name="kudos_received")
   message = models.CharField(max_length=100)
+  created_at = models.DateTimeField(default=timezone.now)
 
   def __str__(self):
     return f'{self.sender.username} -> {self.message} -> {self.receiver.username}'

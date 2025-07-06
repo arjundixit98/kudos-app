@@ -8,6 +8,7 @@ const Dashboard = ({ user }) => {
   const [usersInOrg, setUsersInOrg] = useState(null);
   const [kudosGiven, setKudosGiven] = useState([]);
   const [kudosReceived, setKudosReceived] = useState([]);
+  const [kudosLeft, setKudosLeft] = useState(0);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -21,19 +22,23 @@ const Dashboard = ({ user }) => {
       setUsersInOrg(usersOtherThanMe);
     };
 
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
     const fetchKudos = async () => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/kudos_stats/${user.username}/`
       );
-      const { given, received } = await response.json();
+      const { given, received, remaining } = await response.json();
       console.log(given, received);
       setKudosGiven(given);
       setKudosReceived(received);
+      setKudosLeft(remaining);
     };
 
-    fetchUsers();
     fetchKudos();
-  }, []);
+  }, [showModal]);
 
   if (!user) {
     return <Navigate to="/" replace />;
@@ -51,19 +56,31 @@ const Dashboard = ({ user }) => {
           </p>
         </div>
         <span className="inline-block bg-green-200 text-green-900 px-4 py-2 rounded-full font-semibold shadow">
-          🎉 3 Kudos Left This Week
+          🎉 {kudosLeft} Kudos Left This Week
         </span>
       </div>
 
-      <div className="bg-white p-8 rounded-3xl shadow-xl mb-8">
-        <h2 className="text-2xl font-bold text-indigo-700 mb-4">Give Kudos</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold shadow hover:from-purple-600 hover:to-pink-600"
-        >
-          + Give Kudos
-        </button>
-      </div>
+      {kudosLeft > 0 ? (
+        <div className="bg-white p-8 rounded-3xl shadow-xl mb-8">
+          <h2 className="text-2xl font-bold text-indigo-700 mb-4">
+            Give Kudos
+          </h2>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold shadow hover:from-purple-600 hover:to-pink-600"
+          >
+            + Give Kudos
+          </button>
+        </div>
+      ) : (
+        <div className="bg-white p-8 rounded-3xl shadow-xl mb-8">
+          <h2 className="text-2xl font-bold text-indigo-700 mb-4">
+            You have exhausted your Kudos !
+          </h2>
+
+          <h2 className="text-purple-500 text-xl">Come back next week!</h2>
+        </div>
+      )}
 
       <div className="bg-white p-6 rounded-3xl shadow mb-10">
         <h3 className="text-lg font-bold text-indigo-600 mb-4">
@@ -125,6 +142,7 @@ const Dashboard = ({ user }) => {
           onClose={() => setShowModal(false)}
           usersInOrg={usersInOrg}
           user={user}
+          kudosLeft={kudosLeft}
         />
       )}
     </div>
