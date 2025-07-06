@@ -6,11 +6,6 @@ import Navbar from "./components/Navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 const App = () => {
-  const mockUser = {
-    name: "Arjun Dixit",
-    org: "OpenAI",
-  };
-
   const [currentUser, setCurrentUser] = useState(null);
 
   return (

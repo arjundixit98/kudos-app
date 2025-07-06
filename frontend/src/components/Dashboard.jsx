@@ -1,10 +1,43 @@
 // Dashboard.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import GiveKudosModal from "./GiveKudosModal";
 
 const Dashboard = ({ user }) => {
   const [showModal, setShowModal] = useState(false);
-  const usersInOrg = ["Alice", "Bob", "Charlie"];
+  const [usersInOrg, setUsersInOrg] = useState(null);
+  const [kudosGiven, setKudosGiven] = useState([]);
+  const [kudosReceived, setKudosReceived] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/${user.org}`
+      );
+      const users = await response.json();
+      const usersOtherThanMe = users.filter(
+        (u) => u.username !== user.username
+      );
+      setUsersInOrg(usersOtherThanMe);
+    };
+
+    const fetchKudos = async () => {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/kudos_stats/${user.username}/`
+      );
+      const { given, received } = await response.json();
+      console.log(given, received);
+      setKudosGiven(given);
+      setKudosReceived(received);
+    };
+
+    fetchUsers();
+    fetchKudos();
+  }, []);
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -37,14 +70,15 @@ const Dashboard = ({ user }) => {
           People in your organization
         </h3>
         <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {usersInOrg.map((u, idx) => (
-            <li
-              key={idx}
-              className="p-4 bg-indigo-50 rounded-xl text-center shadow-sm"
-            >
-              {u}
-            </li>
-          ))}
+          {usersInOrg &&
+            usersInOrg.map((u, idx) => (
+              <li
+                key={idx}
+                className="p-4 bg-indigo-50 rounded-xl text-center shadow-sm"
+              >
+                {u.username}
+              </li>
+            ))}
         </ul>
       </div>
 
@@ -53,18 +87,46 @@ const Dashboard = ({ user }) => {
           <h3 className="text-lg font-bold text-purple-600 mb-2">
             Recent Kudos You Gave
           </h3>
-          <p className="text-sm text-gray-500">No kudos given yet.</p>
+          {kudosGiven && kudosGiven.length > 0 ? (
+            <ul className="text-sm text-gray-700 space-y-2">
+              {kudosGiven.map((kudo, index) => (
+                <li key={index} className="border-b pb-2">
+                  To <span className="font-semibold">{kudo.receiver}</span>: "
+                  {kudo.message}"
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">No kudos given yet.</p>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-3xl shadow">
           <h3 className="text-lg font-bold text-purple-600 mb-2">
             Recent Kudos You Received
           </h3>
-          <p className="text-sm text-gray-500">No kudos received yet.</p>
+          {kudosReceived && kudosReceived.length > 0 ? (
+            <ul className="text-sm text-gray-700 space-y-2">
+              {kudosReceived.map((kudo, index) => (
+                <li key={index} className="border-b pb-2">
+                  From <span className="font-semibold">{kudo.sender}</span>: "
+                  {kudo.message}"
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">No kudos received yet.</p>
+          )}
         </div>
       </div>
 
-      {showModal && <GiveKudosModal onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <GiveKudosModal
+          onClose={() => setShowModal(false)}
+          usersInOrg={usersInOrg}
+          user={user}
+        />
+      )}
     </div>
   );
 };

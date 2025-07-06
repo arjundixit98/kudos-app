@@ -1,16 +1,33 @@
 // GiveKudosModal.jsx
 import { useState } from "react";
-const GiveKudosModal = ({ onClose }) => {
+const GiveKudosModal = ({ onClose, usersInOrg, user }) => {
   const [recipient, setRecipient] = useState("");
   const [message, setMessage] = useState("");
   const [kudosLeft, setKudosLeft] = useState(3);
 
-  const users = ["Alice", "Bob", "Charlie"];
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (recipient && message) {
+      console.log(recipient);
       alert(`🎉 Kudo sent to ${recipient}:\n\n“${message}”`);
       setKudosLeft(kudosLeft - 1);
+
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/give_kudos/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            sender_username: user.username,
+            receiver_username: recipient,
+            message,
+          }),
+        });
+      } catch (error) {
+        console.log(error);
+      }
+
       onClose();
     }
   };
@@ -29,11 +46,12 @@ const GiveKudosModal = ({ onClose }) => {
           className="w-full mb-4 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
           <option value="">-- Choose --</option>
-          {users.map((u, idx) => (
-            <option key={idx} value={u}>
-              {u}
-            </option>
-          ))}
+          {usersInOrg &&
+            usersInOrg.map((u, idx) => (
+              <option key={idx} value={u.username}>
+                {u.username}
+              </option>
+            ))}
         </select>
 
         <label className="block mb-2 text-sm font-semibold text-gray-700">

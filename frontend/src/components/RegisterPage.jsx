@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
-const RegisterPage = ({ onRegister }) => {
+const RegisterPage = () => {
   const [username, setUsername] = useState("");
   const [pwd, setPwd] = useState("");
   const [org, setOrg] = useState("");
@@ -26,7 +26,11 @@ const RegisterPage = ({ onRegister }) => {
           const errorData = await response.json();
           throw new Error(errorData.error || "Something went wrong");
         }
-        console.log("User registered successfully");
+
+        const data = await response.json();
+        console.log(data.message);
+        // setCurrentUser(data.user);
+        console.log("User is redirected to Login Page");
         navigate("/");
       } catch (error) {
         console.log(error);

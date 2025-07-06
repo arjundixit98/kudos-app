@@ -7,13 +7,60 @@ from .models import CustomUser
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from .models import Kudos
+from .serializers import KudosSerializer
 # Create your views here.
 
 
 class HomeAPIView(APIView):
   def get(self, request):
     return JsonResponse({'message':'Hi'})
-  
+
+class KudosStatsAPIView(APIView):
+  def get(self, request, username):
+    try:
+      user = CustomUser.objects.get(username=username)
+      given = user.kudos_given.all()
+      received = user.kudos_received.all()
+
+      given_serializer = KudosSerializer(given,many=True)
+      received_serializer = KudosSerializer(received, many=True)
+
+      given_serialized = given_serializer.data
+      received_serialized = received_serializer.data
+
+      print(type(given_serialized),given_serialized)
+      return Response({'given':given_serialized, 'received':received_serialized}, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+      return Response({'error' : str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+class GiveKudosAPIView(APIView):
+  def post(self, request):
+    try:
+      data = request.data
+      sender = CustomUser.objects.get(username=data['sender_username'])
+      receiver = CustomUser.objects.get(username=data['receiver_username'])
+      message = data['message']
+      
+      Kudos.objects.create(sender=sender, receiver=receiver, message=message)
+
+      return Response({'message': 'Kudos successfully given'}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+      return Response({'error' : str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+class AllUsersWithinOrgAPIView(APIView):
+  def get(self, request, org):
+    try:
+      users = CustomUser.objects.filter(organization=org).values('id', 'username')
+      return Response(list(users))
+    
+    except Exception as e:
+      return Response({'error' : str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 class LogoutAPIView(APIView):
   def post(self, request):
     try:
@@ -70,7 +117,7 @@ class RegisterAPIView(APIView):
       refresh = RefreshToken.for_user(user)
       access_token = str(refresh.access_token)
 
-      response = Response({'message' : 'User created successfully'}, status=status.HTTP_201_CREATED)
+      response = Response({'message' : 'User created successfully', 'user' : {'username' : data['username'], 'org' : user.organization}}, status=status.HTTP_201_CREATED)
 
       # Set HttpOnly Cookie
       response.set_cookie(
