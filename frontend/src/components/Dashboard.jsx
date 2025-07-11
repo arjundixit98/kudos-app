@@ -58,7 +58,7 @@ const Dashboard = ({ user, setCurrentUser }) => {
         `${import.meta.env.VITE_API_URL}/api/kudos_stats/${user.username}/`
       );
       const { given, received, remaining } = await response.json();
-      console.log(given, received);
+      // console.log(given, received);
       setKudosGiven(given);
       setKudosReceived(received);
       setKudosLeft(remaining);
