@@ -47,7 +47,7 @@ npm start
 ```
 
 4. The app will be running at:  
-   👉 `http://localhost:3000`
+   👉 `http://localhost:5173`
 
 > 🔁 It will automatically reload on file changes.
 
