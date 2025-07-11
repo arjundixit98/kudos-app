@@ -126,6 +126,38 @@ You can connect API calls from frontend to backend using `fetch` or `axios`.
 
 ---
 
+## 🧪 Demo Setup
+
+To populate the app with random demo data for testing or demo purposes:
+
+```bash
+python manage.py generate_demo_data
+```
+
+This will:
+
+- Create 5 demo users (`user0`, `user1`, ..., `user4`)
+- Generate 15 random kudos interactions between them with varied messages, timestamps, and kudos amounts
+- Print a readable summary of all generated interactions in the terminal
+
+> 🔐 All demo users will have the same password: `test1234`
+
+---
+
+## 🔐 Sample Login (if using token-based auth)
+
+Use the credentials in your UI or via `curl`:
+
+```bash
+curl -X POST http://localhost:8000/api/token/ \
+  -H "Content-Type: application/json" \
+  -d '{"username":"user0", "password":"test1234"}'
+```
+
+This will return a token you can use to authenticate API requests.
+
+---
+
 ## 📄 License
 
 MIT — feel free to use and contribute!
