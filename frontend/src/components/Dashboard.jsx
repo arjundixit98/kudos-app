@@ -1,14 +1,41 @@
 // Dashboard.jsx
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import GiveKudosModal from "./GiveKudosModal";
 
-const Dashboard = ({ user }) => {
+const Dashboard = ({ user, setCurrentUser }) => {
   const [showModal, setShowModal] = useState(false);
   const [usersInOrg, setUsersInOrg] = useState(null);
   const [kudosGiven, setKudosGiven] = useState([]);
   const [kudosReceived, setKudosReceived] = useState([]);
   const [kudosLeft, setKudosLeft] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const authCheck = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/auth_check/`,
+          {
+            credentials: "include",
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data.message);
+          setCurrentUser(data.user);
+          navigate("/dashboard");
+        }
+      } catch (error) {
+        console.log("Auth failed", error);
+        setCurrentUser(null);
+        navigate("/login");
+      }
+    };
+
+    authCheck();
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {

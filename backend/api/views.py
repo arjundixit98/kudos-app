@@ -47,7 +47,6 @@ class KudosStatsAPIView(APIView):
       given_serialized = given_serializer.data
       received_serialized = received_serializer.data
 
-      print(type(given_serialized),given_serialized)
       return Response({'given':given_serialized, 
                        'received':received_serialized,
                        'remaining' : max(0, 3-get_kudos_given_this_week(user))

@@ -8,35 +8,10 @@ import {
   Routes,
   Route,
   Navigate,
-  useNavigate,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    const authCheck = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/auth_check/`,
-          {
-            credentials: "include",
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log(data.message);
-          setCurrentUser(data.user);
-        }
-      } catch (error) {
-        console.log("Auth failed", error);
-        setCurrentUser(null);
-      }
-    };
-
-    authCheck();
-  }, []);
 
   return (
     <Router>
@@ -50,11 +25,7 @@ const App = () => {
         <Route
           path="/dashboard"
           element={
-            currentUser ? (
-              <Dashboard user={currentUser} />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            <Dashboard user={currentUser} setCurrentUser={setCurrentUser} />
           }
         />
       </Routes>
