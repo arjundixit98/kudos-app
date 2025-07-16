@@ -43,7 +43,7 @@ npm install
 3. Start the React development server:
 
 ```bash
-npm start
+npm run dev
 ```
 
 4. The app will be running at:  
@@ -77,6 +77,7 @@ pip install -r requirements.txt
 ### 🔹 4. Apply migrations to set up the database
 
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
